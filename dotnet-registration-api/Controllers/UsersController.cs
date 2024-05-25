@@ -17,7 +17,8 @@ namespace dotnet_registration_api.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<User>> Login([FromBody]LoginRequest model)
         {
-            throw new NotImplementedException();
+            var user = await _userService.Login(model);
+            return Ok(user);
         }
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register([FromBody]RegisterRequest model)
@@ -28,22 +29,27 @@ namespace dotnet_registration_api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
-            throw new NotImplementedException();
+            var users = await _userService.GetAll();
+            return Ok(users);
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetById(int id)
         {
-            throw new NotImplementedException();
+            var user = await _userService.GetById(id);
+            return Ok(user);
+
         }
         [HttpPut("{id}")]
         public async Task<ActionResult<User>> Update(int id, [FromBody]UpdateRequest model)
         {
-            throw new NotImplementedException();
+            var user = await _userService.Update(id, model);
+            return Ok(user);
         }
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            throw new NotImplementedException();
+            await _userService.Delete(id);
+            return Ok();
         }
     }
 }

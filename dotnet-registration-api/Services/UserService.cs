@@ -15,15 +15,38 @@ namespace dotnet_registration_api.Services
         }
         public async Task<List<User>> GetAll()
         {
-            throw new NotImplementedException();
+            return await _userRepository.GetAllUsers();
         }
         public async Task<User> GetById(int id)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetUserById(id);
+            if (user == null)
+            {
+            throw new NotFoundException("User not found");
+            }
+            return user;
         }
         public async Task<User> Login(LoginRequest login)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(login.Username) || string.IsNullOrEmpty(login.Password))
+            {
+            throw new AppException("Username and password cannot be empty");
+            }
+
+            var user = await _userRepository.GetUserByUsername(login.Username);
+
+            if (user == null)
+            {
+            throw new NotFoundException("Username or password is wrong");
+            }
+            var hashedPassword = HashHelper.HashPassword(login.Password);
+
+            if (user.PasswordHash != hashedPassword)
+            {
+            throw new NotFoundException("Username or password is wrong");
+            }           
+
+            return user;
         }
         public async Task<User> Register(RegisterRequest register)
         {
@@ -53,11 +76,57 @@ namespace dotnet_registration_api.Services
         }
         public async Task<User> Update(int id, UpdateRequest updateRequest)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetUserById(id);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            if (!string.IsNullOrEmpty(updateRequest.OldPassword))
+            {
+                var hashedOldPassword = HashHelper.HashPassword(updateRequest.OldPassword);
+                if (user.PasswordHash != hashedOldPassword)
+                {
+                    throw new AppException("Old password is wrong");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(updateRequest.Username))
+            {
+                var existingUser = await _userRepository.GetUserByUsername(updateRequest.Username);
+                if (existingUser != null && existingUser.Id != id)
+                {
+                    throw new AppException("Username is already taken");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(updateRequest.NewPassword))
+            {
+                user.PasswordHash = HashHelper.HashPassword(updateRequest.NewPassword);
+            }
+
+            if (!string.IsNullOrEmpty(updateRequest.FirstName))
+            {
+                user.FirstName = updateRequest.FirstName;
+            }
+
+            if (!string.IsNullOrEmpty(updateRequest.LastName))
+            {
+                user.LastName = updateRequest.LastName;
+            }
+
+            await _userRepository.UpdateUser(user);
+            return user;
         }
         public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetUserById(id);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            await _userRepository.DeleteUser(id);
         }
 
     }
