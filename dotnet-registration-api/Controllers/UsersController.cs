@@ -22,7 +22,8 @@ namespace dotnet_registration_api.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register([FromBody]RegisterRequest model)
         {
-            throw new NotImplementedException();
+            var user = await _userService.Register(model);
+            return Ok(user);
         }
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
